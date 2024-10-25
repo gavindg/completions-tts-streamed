@@ -12,6 +12,8 @@ def main():
     resp_text = cc_request(context_history)  # , max_tokens=100)
     tts_request(resp_text)
 
+    print(f'text response:\n{resp_text}')
+
 
 if __name__ == '__main__':
     main()

@@ -1,7 +1,12 @@
+"""
+based on 11labs api reference examples
+"""
+
 import requests
 from os import getenv, mkdir, path
 import dotenv
 from pathlib import Path
+import time
 
 dotenv.load_dotenv()
 
@@ -11,7 +16,7 @@ if not path.exists(Path(__file__).parent / 'out'):
 
 
 # 11labs
-VOICE_ID = "nPczCjzI2devNBz1zQrb"
+VOICE_ID = "nPczCjzI2devNBz1zQrb"   # brian the goat
 ELEVENLABS_SECRET = getenv('ELEVENLABS_SECRET')
 XI_HEADERS = {
         "Accept": "application/json",
@@ -35,6 +40,7 @@ def get_voices():
 
 
 def tts_request(prompt: str):
+    total_time = 0
     data = {
         "text": prompt,
         "model_id": "eleven_multilingual_v2",
@@ -46,15 +52,31 @@ def tts_request(prompt: str):
         }
     }
 
-    resp = requests.post(XI_TTS_ENDPOINT, headers=XI_HEADERS, json=data, stream=True)
+    print("[XI] request sent ... ", end='', flush=True)
+    start = time.process_time()
+    resp = requests.post(
+            XI_TTS_ENDPOINT,
+            headers=XI_HEADERS,
+            json=data,
+            stream=True
+            )
+    end = time.process_time()
+    print(f"done in {(end - start) * 1000} ms.")
+    total_time += (end - start) * 1000
 
-    # get outta here with that
+    # get outta here with that weird stuff
     if not resp.ok:
         print(resp.content)
         raise
 
-    # write to the file
+    # stream in
     with open(OUTPUT_PATH, "wb") as f:
+        start = time.process_time()
+        print("[XI] streaming ... ", end='', flush=True)
         for chunk in resp.iter_content(chunk_size=CHUNK_SIZE):
             f.write(chunk)
-        print("streamed audio played successfully")
+        end = time.process_time()
+        print(f"done in {(end - start) * 1000} ms.")
+        total_time += (end - start) * 1000
+    
+    return total_time
