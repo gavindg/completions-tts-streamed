@@ -1,6 +1,7 @@
 .venv/
 venv/
 .env
+out/
 
 __pycache__/
 run
